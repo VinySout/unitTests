@@ -1,17 +1,24 @@
 package br.com.unitTests.servicos;
 
 
+import static br.com.unitTests.builders.FilmeBuilder.umFilme;
 import static br.com.unitTests.builders.FilmeBuilder.umFilmeSemEstoque;
+import static br.com.unitTests.builders.LocacaoBuilder.umLocacao;
 import static br.com.unitTests.builders.UsuarioBuilder.umUsuario;
-import static br.com.unitTests.matchers.MatchersProprios.caiEm;
 import static br.com.unitTests.matchers.MatchersProprios.caiNumaSegunda;
 import static br.com.unitTests.utils.DataUtils.isMesmaData;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.fail;
+import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -23,18 +30,21 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
+import org.mockito.ArgumentCaptor;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockitoAnnotations;
 
 import br.com.unitTests.builders.FilmeBuilder;
-import br.com.unitTests.builders.UsuarioBuilder;
+import br.com.unitTests.daos.LocacaoDAO;
 import br.com.unitTests.entidades.Filme;
 import br.com.unitTests.entidades.Locacao;
 import br.com.unitTests.entidades.Usuario;
 import br.com.unitTests.exceptions.FilmeSemEstoqueException;
 import br.com.unitTests.exceptions.LocadoraException;
-import br.com.unitTests.matchers.DiaSemanaMatcher;
 import br.com.unitTests.matchers.MatchersProprios;
 import br.com.unitTests.utils.DataUtils;
-import sun.util.resources.LocaleData;
 
 
 /**
@@ -49,8 +59,15 @@ import sun.util.resources.LocaleData;
  */
 public class LocacaoServiceTest {
 	
+	@InjectMocks
 	private LocacaoService service = null;
-	private List<Filme> filmes = null;
+	
+	@Mock
+	private SPCService spc;
+	@Mock
+	private LocacaoDAO dao;
+	@Mock
+	private EmailService emailService;
 	
 	@Rule
 	public ErrorCollector error = new ErrorCollector();
@@ -60,8 +77,7 @@ public class LocacaoServiceTest {
 	
 	@Before
 	public void setup() {
-		service = new LocacaoService();
-		filmes = new ArrayList<Filme>();
+		MockitoAnnotations.initMocks(this);
 	}
 	
 	@Test
@@ -70,7 +86,7 @@ public class LocacaoServiceTest {
 		
 		//cenario
 		Usuario usuario = umUsuario().agora();
-		filmes.add(FilmeBuilder.umFilme().comValor(5.0).agora());
+		List<Filme> filmes = Arrays.asList(umFilme().comValor(5.0).agora());
 		
 		//acao
 		Locacao locacao = service.alugarFilme(usuario, filmes);
@@ -91,9 +107,7 @@ public class LocacaoServiceTest {
 		//cenario
 		Usuario usuario = umUsuario().agora();
 		
-		Filme filme = umFilmeSemEstoque().agora();
-		
-		filmes.add(filme);
+		List<Filme> filmes = Arrays.asList(umFilmeSemEstoque().agora());
 		
 		//acao
 		service.alugarFilme(usuario, filmes);
@@ -108,7 +122,7 @@ public class LocacaoServiceTest {
 	@Test
 	public void naoDeveAlugarFilmeSemUsuario() throws FilmeSemEstoqueException {
 		//cenario
-		filmes.add(FilmeBuilder.umFilme().agora());
+		List<Filme> filmes = Arrays.asList(umFilme().agora());
 		
 		//acao
 		try {
@@ -139,9 +153,8 @@ public class LocacaoServiceTest {
 	public void devePagar75PctNoFilme3() throws LocadoraException, FilmeSemEstoqueException {
 		//cenario
 		Usuario usuario = umUsuario().agora();
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
+		
+		List<Filme> filmes = Arrays.asList(umFilme().agora(), umFilme().agora(), umFilme().agora());
 		
 		//acao
 		Locacao resultado = service.alugarFilme(usuario, filmes);
@@ -155,10 +168,8 @@ public class LocacaoServiceTest {
 	public void devePagar50PctNoFilme4() throws LocadoraException, FilmeSemEstoqueException {
 		//cenario
 		Usuario usuario = umUsuario().agora();
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
+		
+		List<Filme> filmes = Arrays.asList(umFilme().agora(), umFilme().agora(), umFilme().agora(), umFilme().agora());
 		
 		//acao
 		Locacao resultado = service.alugarFilme(usuario, filmes);
@@ -172,11 +183,8 @@ public class LocacaoServiceTest {
 	public void devePagar25PctNoFilme5() throws LocadoraException, FilmeSemEstoqueException {
 		//cenario
 		Usuario usuario = umUsuario().agora();
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
+		
+		List<Filme> filmes = Arrays.asList(umFilme().agora(), umFilme().agora(), umFilme().agora(), umFilme().agora(), umFilme().agora());
 		
 		//acao
 		Locacao resultado = service.alugarFilme(usuario, filmes);
@@ -190,12 +198,14 @@ public class LocacaoServiceTest {
 	public void devePagar0PctNoFilme6() throws LocadoraException, FilmeSemEstoqueException {
 		//cenario
 		Usuario usuario = umUsuario().agora();
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
-		filmes.add(FilmeBuilder.umFilme().agora());
+		
+		List<Filme> filmes = Arrays.asList(
+				umFilme().agora(), 
+				umFilme().agora(), 
+				umFilme().agora(), 
+				umFilme().agora(), 
+				umFilme().agora(), 
+				umFilme().agora());
 		
 		//acao
 		Locacao resultado = service.alugarFilme(usuario, filmes);
@@ -210,7 +220,7 @@ public class LocacaoServiceTest {
 		Assume.assumeTrue(DataUtils.verificarDiaSemana(new Date(), Calendar.SATURDAY));
 		//cenario
 		Usuario usuario = umUsuario().agora();
-		filmes.add(FilmeBuilder.umFilme().agora());
+		List<Filme> filmes = Arrays.asList(umFilme().agora());
 		
 		//acao
 		Locacao resultado = service.alugarFilme(usuario, filmes);
@@ -223,5 +233,87 @@ public class LocacaoServiceTest {
 //		assertThat(resultado.getDataRetorno(), caiEm(Calendar.MONDAY));
 		assertThat(resultado.getDataRetorno(), caiNumaSegunda());
 		
+	}
+	
+	@Test
+	public void naoDeveAlugarFilmeParaNegativadSPC() throws Exception {
+		//cenario
+		Usuario usuario = umUsuario().agora();
+		List<Filme> filmes = Arrays.asList(FilmeBuilder.umFilme().agora());
+		
+		when(spc.possuiNegativacao(Mockito.any(Usuario.class))).thenReturn(true);
+		
+		//acao
+		try {
+			service.alugarFilme(usuario, filmes);
+
+		//verificacao
+			Assert.fail();
+		} catch (LocadoraException e) {
+			Assert.assertThat(e.getMessage(), is("Usuário negativado"));
+		}
+		
+		verify(spc).possuiNegativacao(usuario);
+	}
+	
+	@Test
+	public void deveEnviarEmailParaLocacoesAtratadas() {
+		//cenario
+		Usuario usuario = umUsuario().agora();
+		Usuario usuario2 = umUsuario().usuarioComNome("Usuario 2").agora();
+		Usuario usuario3 = umUsuario().usuarioComNome("Usuario 3").agora();
+		List<Locacao> locacoes = Arrays.asList(
+				umLocacao().atrasado().comUsuario(usuario).agora(),
+				umLocacao().comUsuario(usuario2).agora(),
+				umLocacao().atrasado().comUsuario(usuario3).agora(),
+				umLocacao().atrasado().comUsuario(usuario3).agora());
+		
+		Mockito.when(dao.obterLocacoesPendentes()).thenReturn(locacoes);
+		
+		//acao
+		service.notificarAtrasos();
+		
+		//verificar
+		verify(emailService, times(3)).notificarAtraso(Mockito.any(Usuario.class));
+		verify(emailService).notificarAtraso(usuario);
+		verify(emailService, atLeastOnce()).notificarAtraso(usuario3);
+		verify(emailService, never()).notificarAtraso(usuario2);
+		verifyNoMoreInteractions(emailService);
+	}
+	
+	@Test
+	public void deveTratarErronoSPC() throws Exception {
+		//cenario
+		Usuario usuario = umUsuario().agora();
+		List<Filme> filmes = Arrays.asList(umFilme().agora());
+		
+		when(spc.possuiNegativacao(usuario)).thenThrow(new Exception("Falha catastrófica"));
+		
+		exception.expect(LocadoraException.class);
+		exception.expectMessage("Problemas com SPC, tente novamente");
+		
+		//acao
+		service.alugarFilme(usuario, filmes);
+		
+		//verificacao
+	}
+	
+	@Test
+	public void deveProrrogarUmaLocacao() {
+		//cenario
+		Locacao locacao = umLocacao().agora();
+		
+		//acao
+		service.prorrogarLocacao(locacao, 3);
+		
+		//verificacao
+		ArgumentCaptor<Locacao> argCapt = ArgumentCaptor.forClass(Locacao.class);
+		Mockito.verify(dao).salvar(argCapt.capture());
+		
+		Locacao locacaoREtornada = argCapt.getValue();
+		
+		error.checkThat(locacaoREtornada.getValor(), is(12.0));
+		error.checkThat(locacaoREtornada.getDataLocacao(), MatchersProprios.ehHoje());
+		error.checkThat(locacaoREtornada.getDataRetorno(), MatchersProprios.ehHojeComDiferencaDias(3));
 	}
 }

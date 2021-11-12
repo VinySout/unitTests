@@ -4,14 +4,20 @@ import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import br.com.unitTests.daos.LocacaoDAO;
 import br.com.unitTests.entidades.Filme;
 import br.com.unitTests.entidades.Locacao;
 import br.com.unitTests.entidades.Usuario;
 import br.com.unitTests.exceptions.FilmeSemEstoqueException;
 import br.com.unitTests.exceptions.LocadoraException;
 import br.com.unitTests.utils.DataUtils;
+import buildermaster.BuilderMaster;
 
 public class LocacaoService {
+	
+	private LocacaoDAO dao;
+	private SPCService spcService;
+	private EmailService emailService;
 	
 	public Locacao alugarFilme(Usuario usuario, List<Filme> filmes) throws LocadoraException, FilmeSemEstoqueException {
 		Double precoLocacao = 0d;
@@ -22,6 +28,17 @@ public class LocacaoService {
 		
 		if(usuario == null) {
 			throw new LocadoraException("Usuario vazio");
+		}
+		
+		boolean negativado;
+		try {
+			negativado = spcService.possuiNegativacao(usuario);
+		} catch (Exception e) {
+			throw new LocadoraException("Problemas com SPC, tente novamente");
+		}
+		
+		if(negativado) {
+			throw new LocadoraException("Usuário negativado");
 		}
 		
 		for (int i = 0; i < filmes.size(); i++) {
@@ -63,9 +80,33 @@ public class LocacaoService {
 		locacao.setDataRetorno(dataEntrega);
 		
 		//Salvando a locacao...	
-		//TODO adicionar mÃ©todo para salvar
+		dao.salvar(locacao);
 		
 		return locacao;
+	}
+	
+	public void notificarAtrasos() {
+		List<Locacao> locacoes = dao.obterLocacoesPendentes();
+		for(Locacao locacao : locacoes) {
+			if(locacao.getDataRetorno().before(new Date())) {
+				emailService.notificarAtraso(locacao.getUsuario());
+			}
+		}
+	}
+	
+	public void prorrogarLocacao(Locacao locacao, int dias) {
+		Locacao novaLocacao = new Locacao();
+		novaLocacao.setUsuario(locacao.getUsuario());
+		novaLocacao.setFilme(locacao.getFilme());
+		novaLocacao.setDataLocacao(new Date());
+		novaLocacao.setDataRetorno(DataUtils.obterDataComDiferencaDias(dias));
+		novaLocacao.setValor(locacao.getValor() * dias);
+		
+		dao.salvar(novaLocacao);
+	}
+	
+	public static void main(String[] args) {
+		new BuilderMaster().gerarCodigoClasse(Locacao.class);
 	}
 
 }

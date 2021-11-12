@@ -14,12 +14,18 @@
 * @Ignore e Assumptions;
 * Testes parametrizáveis;
 * Matchers Próprios;
-* Suíte de Testes;
+* Suíte de Testes.
 - **Seção 3: DataBuilders:**
-* Criação de dados para testes;
-
-
-
-
-
-
+* Criação de dados para testes.
+- **Seção 4: Análise de Cobertura:**
+* Análise de Cobertura.
+- **Seção 5: Mocks:**
+* Dependências Extermas;
+* Objetos Falsos;
+* Mockito;
+* Gravando Expectativas;
+* Verificando Comportamentos;
+* Anotações;
+* Lançando Exceções;
+* Capturando Argumentos;
+* Spy.
