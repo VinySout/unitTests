@@ -20,8 +20,7 @@ public class LocacaoService {
 	private EmailService emailService;
 	
 	public Locacao alugarFilme(Usuario usuario, List<Filme> filmes) throws LocadoraException, FilmeSemEstoqueException {
-		Double precoLocacao = 0d;
-		
+
 		if(filmes == null || filmes.isEmpty()) {
 			throw new LocadoraException("Filme vazio");
 		}
@@ -38,15 +37,45 @@ public class LocacaoService {
 		}
 		
 		if(negativado) {
-			throw new LocadoraException("Usuário negativado");
+			throw new LocadoraException("Usuario negativado");
 		}
 		
+		for (Filme filme : filmes) {
+			if(filme.getEstoque() == 0) 
+				throw new FilmeSemEstoqueException();
+		}
+		
+		Locacao locacao = new Locacao();
+		locacao.setFilme(filmes);
+		locacao.setUsuario(usuario);
+		locacao.setDataLocacao(obterData());
+		
+		locacao.setValor(calcularValorLocacao(filmes));
+		
+
+		//Entrega no dia seguinte
+		Date dataEntrega = obterData();
+		dataEntrega = DataUtils.adicionarDias(dataEntrega, 1);
+		if(DataUtils.verificarDiaSemana(dataEntrega, Calendar.SUNDAY)) {
+			dataEntrega = DataUtils.adicionarDias(dataEntrega, 1);
+		}
+		locacao.setDataRetorno(dataEntrega);
+		
+		//Salvando a locacao...	
+		dao.salvar(locacao);
+		
+		return locacao;
+	}
+
+	protected Date obterData() {
+		return new Date();
+	}
+
+	private Double calcularValorLocacao(List<Filme> filmes) throws FilmeSemEstoqueException {
+		Double valorTotal = 0d;
 		for (int i = 0; i < filmes.size(); i++) {
 			Filme filme = filmes.get(i);
 			Double valorFilme = filme.getPrecoLocacao();
-			
-			if(filme.getEstoque() == 0) 
-				throw new FilmeSemEstoqueException();
 			
 			switch(i) {
 				case 2: valorFilme = valorFilme * 0.75;
@@ -59,36 +88,16 @@ public class LocacaoService {
 				break;
 			}
 			
-			precoLocacao += valorFilme;
+			valorTotal += valorFilme;
 			
 		}
-		
-		Locacao locacao = new Locacao();
-		locacao.setFilme(filmes);
-		locacao.setUsuario(usuario);
-		locacao.setDataLocacao(new Date());
-		
-		locacao.setValor(precoLocacao);
-		
-
-		//Entrega no dia seguinte
-		Date dataEntrega = new Date();
-		dataEntrega = DataUtils.adicionarDias(dataEntrega, 1);
-		if(DataUtils.verificarDiaSemana(dataEntrega, Calendar.SUNDAY)) {
-			dataEntrega = DataUtils.adicionarDias(dataEntrega, 1);
-		}
-		locacao.setDataRetorno(dataEntrega);
-		
-		//Salvando a locacao...	
-		dao.salvar(locacao);
-		
-		return locacao;
+		return valorTotal;
 	}
 	
 	public void notificarAtrasos() {
 		List<Locacao> locacoes = dao.obterLocacoesPendentes();
 		for(Locacao locacao : locacoes) {
-			if(locacao.getDataRetorno().before(new Date())) {
+			if(locacao.getDataRetorno().before(obterData())) {
 				emailService.notificarAtraso(locacao.getUsuario());
 			}
 		}
@@ -98,15 +107,11 @@ public class LocacaoService {
 		Locacao novaLocacao = new Locacao();
 		novaLocacao.setUsuario(locacao.getUsuario());
 		novaLocacao.setFilme(locacao.getFilme());
-		novaLocacao.setDataLocacao(new Date());
+		novaLocacao.setDataLocacao(obterData());
 		novaLocacao.setDataRetorno(DataUtils.obterDataComDiferencaDias(dias));
 		novaLocacao.setValor(locacao.getValor() * dias);
 		
 		dao.salvar(novaLocacao);
-	}
-	
-	public static void main(String[] args) {
-		new BuilderMaster().gerarCodigoClasse(Locacao.class);
 	}
 
 }

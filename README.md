@@ -29,3 +29,11 @@
 * Lançando Exceções;
 * Capturando Argumentos;
 * Spy.
+- **Seção 6: PowerMock:**
+* PowerMock;
+* Mockando Construtores;
+* Mockando método estático;
+* Mockando método privados;
+* Testando métodos privados diretamente;
+* The dark side of PowerMock;
+* Refatorações para substituir o PowerMock. 
