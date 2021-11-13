@@ -1,6 +1,6 @@
 ## Teste Unitário em Java
 
-**Boas práticas de teste unitário utilizando JUnit e Mockito**
+**Boas práticas de teste unitário utilizando JUnit, Mockito e PowerMock**
 
 - **Seção 2: Junit:**
 * Organização dos arquivos;
