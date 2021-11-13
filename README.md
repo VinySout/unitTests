@@ -37,3 +37,5 @@
 * Testando métodos privados diretamente;
 * The dark side of PowerMock;
 * Refatorações para substituir o PowerMock. 
+- **Seção 7: Conteúdo Extra:**
+* Execução dos testes em paralelo.

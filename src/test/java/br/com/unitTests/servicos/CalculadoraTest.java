@@ -1,10 +1,14 @@
 package br.com.unitTests.servicos;
 
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
+import org.junit.runner.RunWith;
+import org.junit.runners.BlockJUnit4ClassRunner;
 
 import br.com.unitTests.exceptions.NaoPodeDividirPorZeroException;
 
@@ -14,13 +18,29 @@ import br.com.unitTests.exceptions.NaoPodeDividirPorZeroException;
  * TDD
  * 
  * */
+//@RunWith(ParallelRunner.class)
+@RunWith(BlockJUnit4ClassRunner.class)
 public class CalculadoraTest {
+	
+	public static StringBuffer ordem = new StringBuffer();
 	
 	private Calculadora calc = null;
 	
 	@Before
 	public void setup() {
 		calc = new Calculadora();
+		System.out.println("Iniciando");
+		ordem.append("1");
+	}
+	
+	@After
+	public void tearDown() {
+		System.out.println("Finalizando...");
+	}
+	
+	@AfterClass
+	public static void tearDownClass() {
+		System.out.println(ordem.toString());
 	}
 	
 	@Rule

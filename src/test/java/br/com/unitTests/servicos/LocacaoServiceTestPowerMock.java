@@ -2,56 +2,39 @@ package br.com.unitTests.servicos;
 
 
 import static br.com.unitTests.builders.FilmeBuilder.umFilme;
-import static br.com.unitTests.builders.FilmeBuilder.umFilmeSemEstoque;
-import static br.com.unitTests.builders.LocacaoBuilder.umLocacao;
 import static br.com.unitTests.builders.UsuarioBuilder.umUsuario;
 import static br.com.unitTests.matchers.MatchersProprios.caiNumaSegunda;
-import static br.com.unitTests.matchers.MatchersProprios.ehHoje;
-import static br.com.unitTests.matchers.MatchersProprios.ehHojeComDiferencaDias;
-import static br.com.unitTests.utils.DataUtils.isMesmaData;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
-import static org.junit.Assert.fail;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.powermock.reflect.Whitebox;
 
-import br.com.unitTests.builders.FilmeBuilder;
-import br.com.unitTests.builders.UsuarioBuilder;
 import br.com.unitTests.daos.LocacaoDAO;
 import br.com.unitTests.entidades.Filme;
 import br.com.unitTests.entidades.Locacao;
 import br.com.unitTests.entidades.Usuario;
-import br.com.unitTests.exceptions.FilmeSemEstoqueException;
 import br.com.unitTests.exceptions.LocadoraException;
-import br.com.unitTests.matchers.MatchersProprios;
 import br.com.unitTests.utils.DataUtils;
 
 
@@ -89,6 +72,17 @@ public class LocacaoServiceTestPowerMock {
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
 		service = PowerMockito.spy(service);
+		CalculadoraTest.ordem.append("4");
+	}
+	
+	@After
+	public void tearDown() {
+		System.out.println("Finalizando 4...");
+	}
+	
+	@AfterClass
+	public static void tearDownClass() {
+		System.out.println(CalculadoraTest.ordem.toString());
 	}
 	
 	@Test

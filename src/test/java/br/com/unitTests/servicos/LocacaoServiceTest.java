@@ -6,9 +6,6 @@ import static br.com.unitTests.builders.FilmeBuilder.umFilmeSemEstoque;
 import static br.com.unitTests.builders.LocacaoBuilder.umLocacao;
 import static br.com.unitTests.builders.UsuarioBuilder.umUsuario;
 import static br.com.unitTests.matchers.MatchersProprios.caiNumaSegunda;
-import static br.com.unitTests.matchers.MatchersProprios.ehHoje;
-import static br.com.unitTests.matchers.MatchersProprios.ehHojeComDiferencaDias;
-import static br.com.unitTests.utils.DataUtils.isMesmaData;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
@@ -22,31 +19,24 @@ import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
 import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
 import java.util.List;
 
+import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Assert;
-import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 import org.junit.rules.ExpectedException;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
 import org.mockito.Spy;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
-import org.powermock.reflect.Whitebox;
 
 import br.com.unitTests.builders.FilmeBuilder;
-import br.com.unitTests.builders.UsuarioBuilder;
 import br.com.unitTests.daos.LocacaoDAO;
 import br.com.unitTests.entidades.Filme;
 import br.com.unitTests.entidades.Locacao;
@@ -67,6 +57,7 @@ import br.com.unitTests.utils.DataUtils;
  * Timely
  *
  */
+//@RunWith(ParallelRunner.class)
 public class LocacaoServiceTest {
 	
 	@InjectMocks
@@ -89,6 +80,18 @@ public class LocacaoServiceTest {
 	@Before
 	public void setup() {
 		MockitoAnnotations.initMocks(this);
+		System.out.println("Inicializando 2....");
+		CalculadoraTest.ordem.append("2");
+	}
+	
+	@After
+	public void tearDown() {
+		System.out.println("Finalizando 2...");
+	}
+	
+	@AfterClass
+	public static void tearDownClass() {
+		System.out.println(CalculadoraTest.ordem.toString());
 	}
 	
 	@Test

@@ -11,7 +11,6 @@ import br.com.unitTests.entidades.Usuario;
 import br.com.unitTests.exceptions.FilmeSemEstoqueException;
 import br.com.unitTests.exceptions.LocadoraException;
 import br.com.unitTests.utils.DataUtils;
-import buildermaster.BuilderMaster;
 
 public class LocacaoService {
 	
